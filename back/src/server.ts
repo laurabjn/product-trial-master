@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
+import { setupSwagger } from "./swagger";
 import authRoutes from "./routes/authRoutes";
 
 dotenv.config();
@@ -10,6 +11,8 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+setupSwagger(app);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI as string)

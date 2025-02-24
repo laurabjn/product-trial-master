@@ -6,7 +6,33 @@ import User from "../models/User";
 
 const router = express.Router();
 
-// Register a new user
+/**
+ * @swagger
+ * tags:
+ *   name: Authentication
+ *   description: User authentication
+ */
+
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       201:
+ *         description: Account created successfully
+ *       400:
+ *         description: User already exists
+ *       500:
+ *         description: Error creating account
+ */
 router.post("/register", async (req, res) => {
     const { username, firstname, email, password } = req.body;
 
@@ -32,14 +58,37 @@ router.post("/register", async (req, res) => {
 
         // Save the user to the database
         await newUser.save();
-
         res.status(201).json({ message: "Account created successfully" });
     } catch (error) {
         res.status(500).json({ error: "Error creating account" });
     }
 });
 
-// Login a user
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Login a user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User logged in successfully, returns a JWT token
+ *       400:
+ *         description: Invalid user or password
+ *       500:
+ *         description: Error connecting
+ */
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
@@ -57,7 +106,11 @@ router.post("/login", async (req, res) => {
         }
 
         // Create a token
-        const token = jwt.sign({ userId: user!._id, isAdmin: user!.isAdmin }, process.env.JWT_SECRET as string, { expiresIn: "1h" });
+        const token = jwt.sign(
+            { userId: user!._id, isAdmin: user!.isAdmin }, 
+            process.env.JWT_SECRET as string, 
+            { expiresIn: "1h" }
+        );
 
         res.json({ token });
     } catch (error) {
