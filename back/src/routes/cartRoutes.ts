@@ -93,6 +93,67 @@ router.get("/", authMiddleware, (req: Request, res: Response) => {
 
 /**
  * @swagger
+ * /cart/{productId}:
+ *   put:
+ *     summary: Update the quantity of a product in the cart
+ *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         description: ID of the product to update
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               quantity:
+ *                 type: integer
+ *                 description: New quantity of the product
+ *                 example: 3
+ *     responses:
+ *       200:
+ *         description: Product quantity updated successfully
+ *       404:
+ *         description: Product not found in cart
+ *       500:
+ *         description: Internal server error
+ */
+router.put("/:productId", authMiddleware, (req: Request, res: Response): void => {
+  try {
+    const { productId } = req.params;
+    const { quantity } = req.body;
+
+    if (!req.session.cart) {
+      res.status(404).json({ error: "Cart is empty" });
+      return;
+    }
+
+    const product = req.session.cart.find((p) => p.productId === productId);
+
+    if (!product) {
+      res.status(404).json({ error: "Product not found in cart" });
+      return;
+    }
+
+    // Mettre à jour la quantité
+    product.quantity = quantity;
+
+    res.json({ message: "Product quantity updated", cart: req.session.cart });
+  } catch (error) {
+    console.error("Error updating product quantity in cart:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * @swagger
  * /cart/clear:
  *   delete:
  *     summary: Clear the cart in session

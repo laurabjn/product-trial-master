@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Response } from "express";
 import { authMiddleware, AuthRequest } from "../middleware/authMiddleware";
 import Wishlist from "../models/Wishlist";
 
@@ -35,7 +35,7 @@ const router = express.Router();
  *       404:
  *         description: Wishlist not found
  */
-router.post("/wishlist", authMiddleware, async (req: AuthRequest, res) => {
+router.post("/", authMiddleware, async (req: AuthRequest, res) => {
   const { productId } = req.body;
   const userId = req.user!.userId;
 
@@ -51,6 +51,42 @@ router.post("/wishlist", authMiddleware, async (req: AuthRequest, res) => {
 
   await wishlist.save();
   res.json(wishlist);
+});
+
+/**
+ * @swagger
+ * /wishlist/clear:
+ *   delete:
+ *     summary: Clear the entire wishlist
+ *     tags: [Wishlist]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Wishlist cleared successfully
+ *       404:
+ *         description: Wishlist not found
+ */
+router.delete("/clear", authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user!.userId;
+
+    const wishlist = await Wishlist.findOne({ userId });
+
+    if (!wishlist) {
+      res.status(404).json({ error: "Wishlist not found" });
+      return;
+    }
+
+    // Vider la liste des produits
+    wishlist.products = [];
+    await wishlist.save();
+
+    res.json({ message: "Wishlist cleared", wishlist });
+  } catch (error) {
+    console.error("Error clearing wishlist:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 /**
@@ -74,19 +110,28 @@ router.post("/wishlist", authMiddleware, async (req: AuthRequest, res) => {
  *       404:
  *         description: Wishlist not found
  */
-// router.delete("/wishlist/:productId", authMiddleware, async (req: AuthRequest, res) => {
-//   const { productId } = req.params;
-//   const userId = req.user!.userId;
+router.delete("/:productId", authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const userId = req.user!.userId;
 
-//   const wishlist = await Wishlist.findOne({ userId });
+    const wishlist = await Wishlist.findOne({ userId });
 
-//   if (!wishlist) return res.status(404).json({ error: "Wishlist not found" });
+    if (!wishlist) {
+      res.status(404).json({ error: "Wishlist not found" });
+      return;
+    }
 
-//   wishlist.products = wishlist.products.filter((p) => p.toString() !== productId);
-//   await wishlist.save();
+    wishlist.products = wishlist.products.filter((p) => p.toString() !== productId);
+    await wishlist.save();
 
-//   res.json(wishlist);
-// });
+    res.json(wishlist);
+  } catch (error) {
+    console.error("Error removing product from wishlist:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 /**
  * @swagger
@@ -102,7 +147,7 @@ router.post("/wishlist", authMiddleware, async (req: AuthRequest, res) => {
  *       404:
  *         description: Wishlist not found
  */
-router.get("/wishlist", authMiddleware, async (req: AuthRequest, res) => {
+router.get("/", authMiddleware, async (req: AuthRequest, res) => {
   const wishlist = await Wishlist.findOne({ userId: req.user!.userId }).populate("products");
   res.json(wishlist);
 });
