@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import session from "express-session";
 
 import { setupSwagger } from "./swagger";
 import authRoutes from "./routes/authRoutes";
@@ -11,6 +12,15 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+app.use(
+    session({
+      secret: process.env.SESSION_SECRET as string, 
+      resave: false,
+      saveUninitialized: true,
+      cookie: { secure: false },
+    })
+);
 
 setupSwagger(app);
 
