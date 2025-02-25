@@ -1,18 +1,18 @@
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
-import { Express } from "express";
+import express from "express";
 
 const options: swaggerJSDoc.Options = {
     definition: {
         openapi: "3.0.0",
         info: {
-          title: "E-commerce API",
-          version: "1.0.0",
-          description: "API documentation for e-commerce module",
+            title: "E-commerce API",
+            version: "1.0.0",
+            description: "API documentation for e-commerce module",
         },
         components: {
             securitySchemes: {
-                BaererAuth: {
+                BearerAuth: { // Correction ici
                     type: "http",
                     scheme: "bearer",
                     bearerFormat: "JWT",
@@ -47,13 +47,16 @@ const options: swaggerJSDoc.Options = {
             },
         },
         servers: [{ url: "http://localhost:5000/api" }],
-      },
-      apis: ["./src/routes/*.ts"], // files containing annotations as above
+    },
+    apis: ["./src/routes/*.ts"], // files containing annotations as above
 };
 
 const swaggerSpec = swaggerJSDoc(options);
 
-export function setupSwagger(app: Express) {
+export function setupSwagger(app: express.Application) {
     app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    app.get("/api-docs.json", (req, res) => {
+        res.json(swaggerSpec);
+    });
     console.log("Swagger documentation available at http://localhost:5000/api-docs");
 }

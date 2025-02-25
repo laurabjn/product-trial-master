@@ -22,8 +22,13 @@ const router = express.Router();
  *         description: Product list retrieved successfully
  */
 router.get("/", async (_, res) => { 
-    const products = await Product.find();
-    res.json(products);
+    try {
+        const products = await Product.find();
+        res.json(products);
+    } catch (error) {
+        console.error("Error retrieving products:", error);
+        res.status(500).json({ error: "Error retrieving products" });
+    }
 });
 
 /**
@@ -45,11 +50,16 @@ router.get("/", async (_, res) => {
  *         description: Product not found
  */
 router.get("/:id", async (req, res) => {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-        res.status(404).json({ error: "Product not found" });
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) {
+            res.status(404).json({ error: "Product not found" });
+        }
+        res.json(product);
+    } catch (error) {
+        console.error("Error retrieving product:", error);
+        res.status(500).json({ error: "Error retrieving product" });
     }
-    res.json(product);
 });
 
 /**
@@ -75,9 +85,10 @@ router.get("/:id", async (req, res) => {
 router.post("/", authMiddleware, adminMiddleware, async (req: AuthRequest, res) => { 
     try {
         const newProduct = new Product(req.body);
-        await newProduct.save();
-        res.status(201).json(newProduct);
+        const savedProduct = await newProduct.save();
+        res.status(201).json(savedProduct);
     } catch (error) {
+        console.error("Error creating product:", error);
         res.status(500).json({ error: "Error creating product" });
     }
 });
@@ -107,8 +118,16 @@ router.post("/", authMiddleware, adminMiddleware, async (req: AuthRequest, res) 
  *         description: Product updated successfully
  */
 router.put("/:id", authMiddleware, adminMiddleware, async (req: AuthRequest, res) => { 
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(product);
+    try {
+        const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!product) {
+            res.status(404).json({ error: "Product not found" });
+        }
+        res.json(product);
+    } catch (error) {
+        console.error("Error updating product:", error);
+        res.status(500).json({ error: "Error updating product" });
+    }
 });
 
 /**
@@ -130,8 +149,16 @@ router.put("/:id", authMiddleware, adminMiddleware, async (req: AuthRequest, res
  *         description: Product deleted successfully
  */
 router.delete("/:id", authMiddleware, adminMiddleware, async (req: AuthRequest, res) => {
-    await Product.findByIdAndDelete(req.params.id);
-    res.json({ message: "Product deleted successfully" });
+    try {
+        const product = await Product.findByIdAndDelete(req.params.id);
+        if (!product) {
+            res.status(404).json({ error: "Product not found" });
+        }
+        res.json({ message: "Product deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting product:", error);
+        res.status(500).json({ error: "Error deleting product" });
+    }
 });
 
 export default router;
