@@ -74,19 +74,19 @@ router.post("/wishlist", authMiddleware, async (req: AuthRequest, res) => {
  *       404:
  *         description: Wishlist not found
  */
-router.delete("/wishlist/:productId", authMiddleware, async (req: AuthRequest, res) => {
-  const { productId } = req.params;
-  const userId = req.user!.userId;
+// router.delete("/wishlist/:productId", authMiddleware, async (req: AuthRequest, res) => {
+//   const { productId } = req.params;
+//   const userId = req.user!.userId;
 
-  const wishlist = await Wishlist.findOne({ userId });
+//   const wishlist = await Wishlist.findOne({ userId });
 
-  if (!wishlist) return res.status(404).json({ error: "Wishlist not found" });
+//   if (!wishlist) return res.status(404).json({ error: "Wishlist not found" });
 
-  wishlist.products = wishlist.products.filter((p) => p.toString() !== productId);
-  await wishlist.save();
+//   wishlist.products = wishlist.products.filter((p) => p.toString() !== productId);
+//   await wishlist.save();
 
-  res.json(wishlist);
-});
+//   res.json(wishlist);
+// });
 
 /**
  * @swagger

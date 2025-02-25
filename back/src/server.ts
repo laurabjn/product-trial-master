@@ -8,6 +8,7 @@ import { setupSwagger } from "./swagger";
 import authRoutes from "./routes/authRoutes";
 
 dotenv.config();
+console.log(process.env.MONGO_URI);
 
 const app = express();
 app.use(express.json());
@@ -15,7 +16,7 @@ app.use(cors());
 
 app.use(
     session({
-      secret: process.env.SESSION_SECRET as string, 
+      secret: process.env.SESSION_SECRET || "default_secret",
       resave: false,
       saveUninitialized: true,
       cookie: { secure: false },
@@ -24,13 +25,18 @@ app.use(
 
 setupSwagger(app);
 
+// Check that MONGO_URI is loaded
+if (!process.env.MONGO_URI) {
+    throw new Error("MONGO_URI is not defined in .env file");
+}
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI as string)
     .then(() => {
         console.log("Connected to MongoDB");
     })
     .catch((err) => {
-        console.error(err);
+        console.error("MongoDB connection error:", err);
     });
 
 // Routes
