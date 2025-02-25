@@ -2,12 +2,14 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import MongoStore from "connect-mongo";
 import session from "express-session";
 
 import { setupSwagger } from "./swagger";
 import authRoutes from "./routes/authRoutes";
 import productRoutes from "./routes/productRoutes";
 import wishlistRoutes from "./routes/wishlistRoutes";
+import cartRoutes from "./routes/cartRoutes";
 
 dotenv.config();
 console.log(process.env.MONGO_URI);
@@ -21,7 +23,8 @@ app.use(
     session({
       secret: process.env.SESSION_SECRET || "default_secret",
       resave: false,
-      saveUninitialized: true,
+      saveUninitialized: false,
+      store: MongoStore.create({ mongoUrl: "mongodb://localhost:27017/product_trial_master" }),
       cookie: { secure: false },
     })
 );
@@ -47,6 +50,7 @@ mongoose.connect(process.env.MONGO_URI as string)
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/cart", cartRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

@@ -42,20 +42,28 @@ const router = express.Router();
  *         description: Internal server error
  */
 router.post("/", authMiddleware, (req: Request, res: Response) => {
-  const { productId, quantity } = req.body;
+  try {
+    console.log("Before adding :", req.session.cart);
+    const { productId, quantity } = req.body;
 
-  if (!req.session.cart) {
-    req.session.cart = [];
+    if (!req.session.cart) {
+      req.session.cart = [];
+    }
+
+    const existingProduct = req.session.cart.find((product) => product.productId === productId);
+
+    if (existingProduct) {
+      existingProduct.quantity += quantity;
+    } else {
+      req.session.cart.push({ productId, quantity });
+    }
+
+    console.log("After adding :", req.session.cart);
+    res.json({ message: "Product added to cart", cart: req.session.cart });
+  } catch (error) {
+    console.error("Error adding product to cart:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
-
-  const existingProduct = req.session.cart.find((product) => product.productId === productId);
-  if (existingProduct) {
-    existingProduct.quantity += quantity;
-  } else {
-    req.session.cart.push({ productId, quantity });
-  }
-
-  res.json({ message: "Product added to cart", cart: req.session.cart });
 });
 
 /**
@@ -73,7 +81,39 @@ router.post("/", authMiddleware, (req: Request, res: Response) => {
  *         description: Internal server error
  */
 router.get("/", authMiddleware, (req: Request, res: Response) => {
-  res.json({ cart: req.session.cart || [] });
+  try {
+    res.json({ cart: req.session.cart || [] });
+  } catch (error) {
+    console.error("Error fetching cart:", error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+});
+
+/**
+ * @swagger
+ * /cart/clear:
+ *   delete:
+ *     summary: Clear the cart in session
+ *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cart cleared successfully
+ *       500:
+ *         description: Internal server error
+ */
+router.delete("/clear", authMiddleware, (req: Request, res: Response) => {
+  try {
+    console.log("Clearing cart...");
+    req.session.cart = [];
+    res.json({ message: "Cart cleared", cart: [] });
+  } catch (error) {
+    console.error("Error clearing cart:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 /**
@@ -99,43 +139,23 @@ router.get("/", authMiddleware, (req: Request, res: Response) => {
  *       500:
  *         description: Internal server error
  */
-router.delete("/:productId", authMiddleware, (req: Request, res: Response) => {
-    // Check if the cart exists
-    if (!req.session.cart) {
-      res.status(404).json({ error: "Cart is empty" });
-    }
-  
-    const { productId } = req.params;
-  
-    // Filter products to remove the one that matches productId
-    const initialCartLength = req.session.cart!.length;
-    req.session.cart = req.session.cart!.filter((p) => p.productId !== productId);
-  
-    // Check if a product has been deleted
-    if (req.session.cart.length === initialCartLength) {
-      res.status(404).json({ error: "Product not found in cart" });
-    }
-  
-    res.json({ message: "Product removed from cart", cart: req.session.cart });
-});
+router.delete("/:productId", authMiddleware, (req: Request, res: Response): void => {
+  if (!req.session.cart) {
+    res.status(404).json({ error: "Cart is empty" });
+    return;
+  }
 
-/**
- * @swagger
- * /cart/clear:
- *   delete:
- *     summary: Clear the cart in session
- *     tags: [Cart]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Cart cleared successfully
- *       500:
- *         description: Internal server error
- */
-router.delete("/clear", authMiddleware, (req: Request, res: Response) => {
-  req.session.cart = [];
-  res.json({ message: "Cart cleared", cart: [] });
+  const { productId } = req.params;
+
+  const initialCartLength = req.session.cart.length;
+  req.session.cart = req.session.cart.filter((p) => p.productId !== productId);
+
+  if (req.session.cart.length === initialCartLength) {
+    res.status(404).json({ error: "Product not found in cart" });
+    return;
+  }
+
+  res.json({ message: "Product removed from cart", cart: req.session.cart });
 });
 
 export default router;
