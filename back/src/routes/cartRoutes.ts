@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import Cart from "../models/Cart";
 import { authMiddleware, AuthRequest } from "../middleware/authMiddleware";
 
@@ -115,41 +115,44 @@ router.post("/", authMiddleware, async (req: any, res) => {
  *       500:
  *         description: Internal server error
  */
-// router.put("/:productId", authMiddleware, async (req: AuthRequest, res: Response): void => {
-//   try {
-//     const { productId } = req.params;
-//     const { quantity } = req.body;
+router.put("/:productId", authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const { quantity } = req.body;
 
-//     if (quantity < 1) {
-//       return res.status(400).json({ error: "Quantity must be at least 1" });
-//     }
+    if (quantity < 1) {
+      res.status(400).json({ error: "Quantity must be at least 1" });
+      return;
+    }
 
-//     // Trouver le panier de l'utilisateur
-//     const cart = await Cart.findOne({ userId: req.user.userId });
+    // Trouver le panier de l'utilisateur
+    const cart = await Cart.findOne({ userId: req.user!.userId });
 
-//     if (!cart) {
-//       return res.status(404).json({ error: "Cart not found" });
-//     }
+    if (!cart) {
+      res.status(404).json({ error: "Cart not found" });
+      return;
+    }
 
-//     // Trouver l'élément du panier correspondant au productId
-//     const item = cart.items.find((item) => item.product.toString() === productId);
+    // Trouver le produit dans le panier
+    const product = cart.items.find((item) => item.product.toString() === productId);
 
-//     if (!item) {
-//       return res.status(404).json({ error: "Product not found in cart" });
-//     }
+    if (!product) {
+      res.status(404).json({ error: "Product not found in cart" });
+      return;
+    }
 
-//     // Mettre à jour la quantité
-//     item.quantity = quantity;
+    // Mettre à jour la quantité
+    product.quantity = quantity;
 
-//     // Sauvegarder le panier mis à jour
-//     await cart.save();
+    // Sauvegarder les modifications
+    await cart.save();
 
-//     res.json({ message: "Product quantity updated successfully", cart });
-//   } catch (error) {
-//     console.error("Error updating product quantity:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
+    res.json({ message: "Product quantity updated successfully", cart });
+  } catch (error) {
+    console.error("Error updating product quantity in cart:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 /**
  * @swagger
