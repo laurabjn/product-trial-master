@@ -20,6 +20,15 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
   template: `
     <form #form="ngForm" (ngSubmit)="onSave()">
       <div class="form-field">
+        <label for="code">Code</label>
+        <input pInputText
+          type="text"
+          id="code"
+          name="code"
+          [(ngModel)]="editedProduct().code"
+          required>
+      </div>
+      <div class="form-field">
         <label for="name">Nom</label>
         <input pInputText
           type="text"
@@ -37,6 +46,23 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
           required/> 
       </div>
       <div class="form-field">
+        <label for="quantity">Quantité</label>
+        <p-inputNumber 
+          [(ngModel)]="editedProduct().quantity" 
+          name="quantity"
+          mode="decimal"
+          required/>
+      </div>
+      <div class="form-field">
+        <label for="image">Image URL</label>
+        <input pInputText
+          type="text"
+          id="image"
+          name="image"
+          [(ngModel)]="editedProduct().image"
+          required>
+      </div>
+      <div class="form-field">
         <label for="description">Description</label>
         <textarea pInputTextarea 
           id="description"
@@ -47,13 +73,49 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
         </textarea>
       </div>      
       <div class="form-field">
-        <label for="description">Catégorie</label>
+        <label for="category">Catégorie</label>
         <p-dropdown 
           [options]="categories" 
           [(ngModel)]="editedProduct().category" 
           name="category"
           appendTo="body"
+          required
         />
+      </div>
+      <div class="form-field">
+        <label for="internalReference">Référence Interne</label>
+        <input pInputText
+          type="text"
+          id="internalReference"
+          name="internalReference"
+          [(ngModel)]="editedProduct().internalReference"
+          required>
+      </div>
+      <div class="form-field">
+        <label for="shellId">Shell ID</label>
+        <p-inputNumber 
+          [(ngModel)]="editedProduct().shellId" 
+          name="shellId"
+          mode="decimal"
+          required/>
+      </div>
+      <div class="form-field">
+        <label for="inventoryStatus">État de l'inventaire</label>
+        <p-dropdown 
+          [options]="inventoryStatusOptions" 
+          [(ngModel)]="editedProduct().inventoryStatus" 
+          name="inventoryStatus"
+          appendTo="body"
+          required
+        />
+      </div>
+      <div class="form-field">
+        <label for="rating">Évaluation</label>
+        <p-inputNumber 
+          [(ngModel)]="editedProduct().rating" 
+          name="rating"
+          mode="decimal"
+          required/>
       </div>
       <div class="flex justify-content-between">
         <p-button type="button" (click)="onCancel()" label="Annuler" severity="help"/>
@@ -88,11 +150,22 @@ export class ProductFormComponent {
     { value: "Electronics", label: "Electronics" },
   ];
 
+  public readonly inventoryStatusOptions: SelectItem[] = [
+    { value: "INSTOCK", label: "In Stock" },
+    { value: "LOWSTOCK", label: "Low Stock" },
+    { value: "OUTOFSTOCK", label: "Out of Stock" },
+  ];
+
   onCancel() {
     this.cancel.emit();
   }
 
   onSave() {
-    this.save.emit(this.editedProduct());
+    const productToSave = {
+      ...this.editedProduct(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.save.emit(productToSave);
   }
 }

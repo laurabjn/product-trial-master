@@ -23,7 +23,7 @@ export class CartComponent implements OnInit {
   /** Modifier la quantité d'un produit */
   public updateQuantity(item: CartItem, quantity: number) {
     if (quantity < 1) return; // Empêcher une quantité négative
-    this.cartService.updateQuantity(item.product.id, quantity).subscribe();
+    this.cartService.updateQuantity(item.product._id, quantity).subscribe();
   }
 
   /** Supprimer un produit du panier */

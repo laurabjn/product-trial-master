@@ -8,7 +8,7 @@ import { DataViewModule } from 'primeng/dataview';
 import { DialogModule } from 'primeng/dialog';
 
 const emptyProduct: Product = {
-  id: 0,
+  _id: 0,
   code: "",
   name: "",
   description: "",
@@ -20,8 +20,8 @@ const emptyProduct: Product = {
   shellId: 0,
   inventoryStatus: "INSTOCK",
   rating: 0,
-  createdAt: 0,
-  updatedAt: 0,
+  createdAt: new Date(),
+  updatedAt: new Date(),
 };
 
 @Component({
@@ -57,7 +57,7 @@ export class ProductListComponent implements OnInit {
   }
 
   public onDelete(product: Product) {
-    this.productsService.delete(product.id).subscribe();
+    this.productsService.delete(product._id).subscribe();
   }
 
   public onSave(product: Product) {
