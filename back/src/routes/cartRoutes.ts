@@ -21,8 +21,10 @@ const router = express.Router();
  *               $ref: '#/components/schemas/Cart'
  */
 router.get("/", authMiddleware, async (req: any, res) => {
+  console.log("get cart");
   try {
     const cart = await Cart.findOne({ userId: req.user.userId }).populate("items.product");
+    console.log(cart);
     res.json(cart || { userId: req.user.userId, items: [] });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });

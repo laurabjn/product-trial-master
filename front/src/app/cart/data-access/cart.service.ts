@@ -9,31 +9,30 @@ import { Cart, CartItem } from "./cart.model";
 })
 export class CartService {
     private readonly http = inject(HttpClient);
-    private readonly path = "/api/cart";
+    private readonly path = "http://localhost:5000/api/cart";
 
     private readonly _cart = signal<Cart>({ id: "", items: [] });
     public readonly cart = this._cart.asReadonly();
 
-    /** Récupérer le panier depuis l'API */
     public getCart(): Observable<Cart> {
+        console.log("getCart");
         return this.http.get<Cart>(this.path).pipe(
             catchError(() => of({ id: "", items: [] })), 
             tap(cart => this._cart.set(cart))
         );
     }
 
-    /** Ajouter un produit au panier */
     public addToCart(product: Product, quantity: number = 1): Observable<boolean> {
-        return this.http.post<boolean>(this.path, { productId: product.id, quantity }).pipe(
+        return this.http.post<boolean>(this.path, { productId: product._id, quantity }).pipe(
             catchError(() => of(true)),
             tap(() => {
                 this._cart.update(cart => {
-                    const existingItem = cart.items.find(item => item.product.id === product.id);
+                    const existingItem = cart.items.find(item => item.product._id === product._id);
                     if (existingItem) {
                         return {
                             ...cart,
                             items: cart.items.map(item =>
-                                item.product.id === product.id
+                                item.product._id === product._id
                                     ? { ...item, quantity: item.quantity + quantity }
                                     : item
                             )
@@ -49,7 +48,6 @@ export class CartService {
         );
     }
 
-    /** Modifier la quantité d'un produit dans le panier */
     public updateQuantity(productId: number, quantity: number): Observable<boolean> {
         return this.http.patch<boolean>(`${this.path}/${productId}`, { quantity }).pipe(
             catchError(() => of(true)),
@@ -57,27 +55,25 @@ export class CartService {
                 this._cart.update(cart => ({
                     ...cart,
                     items: cart.items.map(item =>
-                        item.product.id === productId ? { ...item, quantity } : item
+                        item.product._id === productId ? { ...item, quantity } : item
                     )
                 }));
             })
         );
     }
 
-    /** Supprimer un produit du panier */
     public removeFromCart(productId: number): Observable<boolean> {
         return this.http.delete<boolean>(`${this.path}/${productId}`).pipe( 
             catchError(() => of(true)),
             tap(() => {
                 this._cart.update(cart => ({
                     ...cart,
-                    items: cart.items.filter(item => item.product.id !== productId)
+                    items: cart.items.filter(item => item.product._id !== productId)
                 }));
             })
         );
     }
 
-    /** Vider entièrement le panier */
     public clearCart(): Observable<boolean> {
         return this.http.delete<boolean>(this.path).pipe(
             catchError(() => of(true)),

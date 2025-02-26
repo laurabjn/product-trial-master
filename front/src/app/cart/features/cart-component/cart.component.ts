@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from "@angular/core";
+import { FormsModule } from "@angular/forms";
 import { CartService } from "app/cart/data-access/cart.service";
 import { CartItem } from "app/cart/data-access/cart.model";
 import { TableModule } from "primeng/table";
@@ -10,7 +11,7 @@ import { InputNumberModule } from "primeng/inputnumber";
   templateUrl: "./cart.component.html",
   styleUrls: ["./cart.component.scss"],
   standalone: true,
-  imports: [TableModule, ButtonModule, InputNumberModule],
+  imports: [TableModule, ButtonModule, InputNumberModule, FormsModule],
 })
 export class CartComponent implements OnInit {
   private readonly cartService = inject(CartService);

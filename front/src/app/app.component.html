@@ -6,7 +6,10 @@
         {{ title }}
     </div>
     <div class="p-toolbar-group-end">
-        <i class="pi pi-shopping-cart" style="font-size: 2rem"></i>
+        <!-- <i class="pi pi-shopping-cart" style="font-size: 2rem"></i> -->
+        <span class="cursor-pointer" (click)="onCartClick()">
+            <i class="pi pi-shopping-cart" style="font-size: 2rem"></i>
+        </span>
     </div>
 </p-toolbar>
 <p-splitter 

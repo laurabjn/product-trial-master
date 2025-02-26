@@ -82,10 +82,11 @@ router.get("/:id", async (req, res) => {
  *       500:
  *         description: Error creating product
  */
-router.post("/", authMiddleware, adminMiddleware, async (req: AuthRequest, res) => { 
+router.post("/", /*authMiddleware, adminMiddleware,*/ async (req: AuthRequest, res) => { 
     try {
         const newProduct = new Product(req.body);
         const savedProduct = await newProduct.save();
+        console.log("Product created:", savedProduct);
         res.status(201).json(savedProduct);
     } catch (error) {
         console.error("Error creating product:", error);
@@ -117,7 +118,7 @@ router.post("/", authMiddleware, adminMiddleware, async (req: AuthRequest, res) 
  *       200:
  *         description: Product updated successfully
  */
-router.put("/:id", authMiddleware, adminMiddleware, async (req: AuthRequest, res) => { 
+router.put("/:id", /*authMiddleware, adminMiddleware,*/ async (req: AuthRequest, res) => { 
     try {
         const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!product) {
@@ -148,7 +149,7 @@ router.put("/:id", authMiddleware, adminMiddleware, async (req: AuthRequest, res
  *       200:
  *         description: Product deleted successfully
  */
-router.delete("/:id", authMiddleware, adminMiddleware, async (req: AuthRequest, res) => {
+router.delete("/:id", /*authMiddleware, adminMiddleware,*/ async (req: AuthRequest, res) => {
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
         if (!product) {
