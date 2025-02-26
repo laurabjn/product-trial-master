@@ -111,7 +111,7 @@ router.post("/login", async (req, res) => {
             process.env.JWT_SECRET as string, 
             { expiresIn: "1h" }
         );
-
+        console.log("User logged in:", user);
         res.json({ token });
     } catch (error) {
       res.status(500).json({ error: "Error connecting" });

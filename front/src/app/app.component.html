@@ -5,10 +5,18 @@
     <div class="p-toolbar-group-center">
         {{ title }}
     </div>
-    <div class="p-toolbar-group-end">
+    <div class="p-toolbar-group-end flex gap-4">
         <!-- <i class="pi pi-shopping-cart" style="font-size: 2rem"></i> -->
-        <span class="cursor-pointer" (click)="onCartClick()">
-            <i class="pi pi-shopping-cart" style="font-size: 2rem"></i>
+        <span *ngIf="isLoggedIn" class="cursor-pointer text-3xl" (click)="onCartClick()">
+            <i class="pi pi-shopping-cart"></i>
+        </span>
+        
+        <span *ngIf="!isLoggedIn" class="cursor-pointer text-lg text-gray-300 hover:text-white transition-colors" (click)="onLoginClick()">
+            Se connecter
+        </span>
+        
+        <span *ngIf="isLoggedIn" class="flex items-center cursor-pointer text-lg text-gray-300 hover:text-white transition-colors" (click)="onLogoutClick()">
+            <span class="ml-2">Se déconnecter</span>
         </span>
     </div>
 </p-toolbar>

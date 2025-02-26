@@ -1,0 +1,9 @@
+.p-field {
+    display: block; /* Assure que les éléments sont en bloc */
+    margin-bottom: 1rem; /* Ajoute un espacement entre les champs */
+}
+
+label {
+    margin-bottom: 0.5rem; /* Ajoute de l'espace entre le label et l'input */
+    display: block; /* Force le label à prendre toute la largeur */
+}
