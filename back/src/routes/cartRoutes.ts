@@ -1,67 +1,30 @@
 import express from "express";
-import { authMiddleware } from "../middleware/authMiddleware";
-import { Request, Response } from "express";
+import Cart from "../models/Cart";
+import { authMiddleware, AuthRequest } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
 /**
  * @swagger
- * tags:
- *   name: Cart
- *   description: Cart management using sessions
- */
-
-/**
- * @swagger
  * /cart:
- *   post:
- *     summary: Add a product to the cart (stored in session)
+ *   get:
+ *     summary: Get the user's cart
  *     tags: [Cart]
  *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - productId
- *               - quantity
- *             properties:
- *               productId:
- *                 type: string
- *                 example: "65e7a4f1289b2c001f33bc55"
- *               quantity:
- *                 type: integer
- *                 example: 2
+ *       - BearerAuth: []
  *     responses:
  *       200:
- *         description: Product added to cart successfully
- *       500:
- *         description: Internal server error
+ *         description: Returns the user's cart
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Cart'
  */
-router.post("/", authMiddleware, (req: Request, res: Response) => {
+router.get("/", authMiddleware, async (req: any, res) => {
   try {
-    console.log("Before adding :", req.session.cart);
-    const { productId, quantity } = req.body;
-
-    if (!req.session.cart) {
-      req.session.cart = [];
-    }
-
-    const existingProduct = req.session.cart.find((product) => product.productId === productId);
-
-    if (existingProduct) {
-      existingProduct.quantity += quantity;
-    } else {
-      req.session.cart.push({ productId, quantity });
-    }
-
-    console.log("After adding :", req.session.cart);
-    res.json({ message: "Product added to cart", cart: req.session.cart });
+    const cart = await Cart.findOne({ userId: req.user.userId }).populate("items.product");
+    res.json(cart || { userId: req.user.userId, items: [] });
   } catch (error) {
-    console.error("Error adding product to cart:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -69,25 +32,52 @@ router.post("/", authMiddleware, (req: Request, res: Response) => {
 /**
  * @swagger
  * /cart:
- *   get:
- *     summary: Get the cart from session
+ *   post:
+ *     summary: Add an item to the cart
  *     tags: [Cart]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productId:
+ *                 type: string
+ *                 description: The ID of the product to add
+ *               quantity:
+ *                 type: integer
+ *                 description: The quantity of the product
  *     responses:
  *       200:
- *         description: The user's cart
- *       500:
- *         description: Internal server error
+ *         description: Item added to cart
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Cart'
  */
-router.get("/", authMiddleware, (req: Request, res: Response) => {
+router.post("/", authMiddleware, async (req: any, res) => {
   try {
-    res.json({ cart: req.session.cart || [] });
-  } catch (error) {
-    console.error("Error fetching cart:", error);
-    if (!res.headersSent) {
-      res.status(500).json({ error: "Internal server error" });
+    const { productId, quantity } = req.body;
+    let cart = await Cart.findOne({ userId: req.user.userId });
+
+    if (!cart) {
+      cart = new Cart({ userId: req.user.userId, items: [] });
     }
+
+    const existingItem = cart.items.find((item: any) => item.product.toString() === productId);
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      cart.items.push({ product: productId, quantity });
+    }
+
+    await cart.save();
+    res.json(cart);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -125,98 +115,79 @@ router.get("/", authMiddleware, (req: Request, res: Response) => {
  *       500:
  *         description: Internal server error
  */
-router.put("/:productId", authMiddleware, (req: Request, res: Response): void => {
-  try {
-    const { productId } = req.params;
-    const { quantity } = req.body;
+// router.put("/:productId", authMiddleware, async (req: AuthRequest, res: Response): void => {
+//   try {
+//     const { productId } = req.params;
+//     const { quantity } = req.body;
 
-    if (!req.session.cart) {
-      res.status(404).json({ error: "Cart is empty" });
-      return;
-    }
+//     if (quantity < 1) {
+//       return res.status(400).json({ error: "Quantity must be at least 1" });
+//     }
 
-    const product = req.session.cart.find((p) => p.productId === productId);
+//     // Trouver le panier de l'utilisateur
+//     const cart = await Cart.findOne({ userId: req.user.userId });
 
-    if (!product) {
-      res.status(404).json({ error: "Product not found in cart" });
-      return;
-    }
+//     if (!cart) {
+//       return res.status(404).json({ error: "Cart not found" });
+//     }
 
-    // Mettre à jour la quantité
-    product.quantity = quantity;
+//     // Trouver l'élément du panier correspondant au productId
+//     const item = cart.items.find((item) => item.product.toString() === productId);
 
-    res.json({ message: "Product quantity updated", cart: req.session.cart });
-  } catch (error) {
-    console.error("Error updating product quantity in cart:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+//     if (!item) {
+//       return res.status(404).json({ error: "Product not found in cart" });
+//     }
 
-/**
- * @swagger
- * /cart/clear:
- *   delete:
- *     summary: Clear the cart in session
- *     tags: [Cart]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Cart cleared successfully
- *       500:
- *         description: Internal server error
- */
-router.delete("/clear", authMiddleware, (req: Request, res: Response) => {
-  try {
-    console.log("Clearing cart...");
-    req.session.cart = [];
-    res.json({ message: "Cart cleared", cart: [] });
-  } catch (error) {
-    console.error("Error clearing cart:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+//     // Mettre à jour la quantité
+//     item.quantity = quantity;
+
+//     // Sauvegarder le panier mis à jour
+//     await cart.save();
+
+//     res.json({ message: "Product quantity updated successfully", cart });
+//   } catch (error) {
+//     console.error("Error updating product quantity:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
 /**
  * @swagger
  * /cart/{productId}:
  *   delete:
- *     summary: Remove a product from the cart in session
+ *     summary: Remove an item from the cart
  *     tags: [Cart]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: productId
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: The product ID to remove from the cart
+ *         description: The ID of the product to remove
  *     responses:
  *       200:
- *         description: Product removed from cart successfully
- *       404:
- *         description: Product not found in cart
- *       500:
- *         description: Internal server error
+ *         description: Item removed from cart
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Cart'
  */
-router.delete("/:productId", authMiddleware, (req: Request, res: Response): void => {
-  if (!req.session.cart) {
-    res.status(404).json({ error: "Cart is empty" });
-    return;
+router.delete("/:productId", authMiddleware, async (req: any, res) => {
+  try {
+    const { productId } = req.params;
+    let cart = await Cart.findOne({ userId: req.user.userId });
+
+    if (cart) {
+      cart.items = cart.items.filter((item: any) => item.product.toString() !== productId);
+      await cart.save();
+    }
+
+    res.json(cart);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
   }
-
-  const { productId } = req.params;
-
-  const initialCartLength = req.session.cart.length;
-  req.session.cart = req.session.cart.filter((p) => p.productId !== productId);
-
-  if (req.session.cart.length === initialCartLength) {
-    res.status(404).json({ error: "Product not found in cart" });
-    return;
-  }
-
-  res.json({ message: "Product removed from cart", cart: req.session.cart });
 });
 
 export default router;
