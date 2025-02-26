@@ -1,0 +1,36 @@
+<p-table [value]="cart()?.items" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Image</th>
+        <th>Produit</th>
+        <th>Prix</th>
+        <th>Quantité</th>
+        <th>Total</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-item>
+      <tr>
+        <td><img [src]="item.product.image" alt="Produit" width="50"></td>
+        <td>{{ item.product.name }}</td>
+        <td>{{ item.product.price }} €</td>
+        <td>
+          <p-inputNumber [(ngModel)]="item.quantity" [min]="1" (onBlur)="updateQuantity(item, item.quantity)"></p-inputNumber>
+        </td>
+        <td>{{ item.product.price * item.quantity }} €</td>
+        <td>
+          <button pButton type="button" icon="pi pi-trash" class="p-button-danger" (click)="removeItem(item.product.id)"></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <tr>
+        <td colspan="4" style="text-align: right; font-weight: bold;">Total :</td>
+        <td>{{ getTotal() }} €</td>
+        <td>
+          <button pButton label="Vider le panier" class="p-button-danger" (click)="clearCart()"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+  
