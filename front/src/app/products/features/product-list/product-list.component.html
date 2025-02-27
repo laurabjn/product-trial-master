@@ -21,8 +21,9 @@
                 </div>
 
                 <ng-template pTemplate="footer">
-                    <div class="flex gap-3 mt-1">
+                    <div class="flex gap-3 mt-1" *ngIf="isAdmin">
                         <p-button label="Modifier" severity="secondary" (onClick)="onUpdate(product)"/>
+                        <p-button label="Ajouter au panier" severity="secondary" (onClick)="addToCart(product)" />
                         <p-button label="Supprimer" severity="danger" (onClick)="onDelete(product)" />
                     </div>
                 </ng-template>
@@ -40,3 +41,15 @@
         (cancel)="onCancel()"
     />
 </p-dialog>
+
+<p-dialog [(visible)]="isCartDialogVisible" [style]="{ width: '40vw' }" header="Ajouter au panier">
+    <div class="flex flex-col gap-4">
+        <app-product-quantity [(quantity)]="selectedQuantity" [max]="selectedProduct()?.quantity || 0"></app-product-quantity>
+        <div class="flex justify-end gap-3">
+            <p-button label="Annuler" severity="secondary" (onClick)="closeCartDialog()" />
+            <p-button label="Confirmer" severity="primary" (onClick)="confirmAddToCart()" />
+        </div>
+    </div>
+</p-dialog>
+
+<p-toast></p-toast>

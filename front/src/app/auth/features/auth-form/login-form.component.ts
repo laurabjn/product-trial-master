@@ -47,18 +47,13 @@ export class LoginComponent {
   onSubmit() {
     this.errorMessage = null;
 
-    this.authService.login(this.email, this.password).subscribe({
-      next: (response) => {
+    this.authService.login(this.email, this.password).subscribe((response) => {
         if (response) {
-          this.router.navigate(['/']);
           window.location.reload();
+          this.router.navigate(['/']);
         } else {
           this.errorMessage = "Identifiants incorrects.";
         }
-      },
-      error: (err) => {
-        this.errorMessage = "Une erreur est survenue. Veuillez réessayer.";
-      }
     });
   }
 }

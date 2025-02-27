@@ -1,12 +1,17 @@
 import { Component, OnInit, inject, signal } from "@angular/core";
 import { CommonModule } from '@angular/common';
+import { ToastModule } from 'primeng/toast';
 import { Product } from "app/products/data-access/product.model";
-import { ProductsService } from "app/products/data-access/products.service";
 import { ProductFormComponent } from "app/products/ui/product-form/product-form.component";
+import { ProductQuantityComponent } from "app/products/ui/product-quantity/product-quantity.component";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { DataViewModule } from 'primeng/dataview';
 import { DialogModule } from 'primeng/dialog';
+import { AuthService } from "app/auth/data-access/auth.service";
+import { ProductsService } from "app/products/data-access/products.service";
+import { CartService } from "app/cart/data-access/cart.service";
+import { NotificationService } from "app/notification.service";
 
 const emptyProduct: Product = {
   _id: 0,
@@ -30,19 +35,28 @@ const emptyProduct: Product = {
   templateUrl: "./product-list.component.html",
   styleUrls: ["./product-list.component.scss"],
   standalone: true,
-  imports: [DataViewModule, CardModule, ButtonModule, DialogModule, ProductFormComponent, CommonModule],
+  imports: [DataViewModule, CardModule, ButtonModule, DialogModule, ProductFormComponent, ProductQuantityComponent, CommonModule, ToastModule],
 })
 export class ProductListComponent implements OnInit {
   private readonly productsService = inject(ProductsService);
+  private readonly authService = inject(AuthService);
+  public readonly cartService = inject(CartService);
+  private readonly notificationService = inject(NotificationService)
 
   public readonly products = this.productsService.products;
 
+  public isCartDialogVisible = false;
+  public isAdmin = false;
   public isDialogVisible = false;
   public isCreation = false;
+  public selectedProduct = signal<Product | null>(null);
+  public selectedQuantity = signal<number>(1);
   public readonly editedProduct = signal<Product>(emptyProduct);
 
   ngOnInit() {
     this.productsService.get().subscribe();
+    const user = this.authService.getCurrentUser();
+    this.isAdmin = user?.isAdmin ?? false;
   }
 
   public onCreate() {
@@ -61,6 +75,25 @@ export class ProductListComponent implements OnInit {
     this.productsService.delete(product._id).subscribe();
   }
 
+  public addToCart(product: Product) {
+    this.selectedProduct.set(product);
+    this.selectedQuantity.set(1); 
+    this.isCartDialogVisible = true;
+  }
+
+  public confirmAddToCart() {
+    const product = this.selectedProduct();
+    const quantity = this.selectedQuantity();
+    const userId = this.authService.getCurrentUser()?.userId;
+  
+    if (product && userId) {
+      this.cartService.addToCart(product, quantity, userId).subscribe(() => {
+        this.notificationService.showSuccess(`${product.name} a été ajouté au panier.`);
+        this.closeCartDialog();
+      });
+    }
+  }
+
   public onSave(product: Product) {
     if (this.isCreation) {
       this.productsService.create(product).subscribe();
@@ -76,5 +109,9 @@ export class ProductListComponent implements OnInit {
 
   private closeDialog() {
     this.isDialogVisible = false;
+  }
+
+  public closeCartDialog() {
+    this.isCartDialogVisible = false;
   }
 }

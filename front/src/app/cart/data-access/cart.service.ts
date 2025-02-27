@@ -1,14 +1,16 @@
 import { Injectable, signal, inject } from "@angular/core";
 import { Product } from "../../products/data-access/product.model";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { catchError, Observable, of, tap } from "rxjs";
 import { Cart, CartItem } from "./cart.model";
+import { AuthService } from "app/auth/data-access/auth.service";
 
 @Injectable({
     providedIn: "root"
 })
 export class CartService {
     private readonly http = inject(HttpClient);
+    private readonly authService = inject(AuthService);
     private readonly path = "http://localhost:5000/api/cart";
 
     private readonly _cart = signal<Cart>({ id: "", items: [] });
@@ -22,8 +24,17 @@ export class CartService {
         );
     }
 
-    public addToCart(product: Product, quantity: number = 1): Observable<boolean> {
-        return this.http.post<boolean>(this.path, { productId: product._id, quantity }).pipe(
+    public addToCart(product: Product, quantity: number = 1, userId: string): Observable<boolean> {
+        if (!userId) {
+            console.error("User ID is not available");
+        }
+
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.authService.getToken()}` 
+          });
+        
+        console.log("addToCart", product, quantity);
+        return this.http.post<boolean>(this.path, { productId: product._id, quantity, userId }, { headers }).pipe(
             catchError(() => of(true)),
             tap(() => {
                 this._cart.update(cart => {
