@@ -1,109 +1,51 @@
-# Consignes
+# Product trial master
 
-- Vous êtes développeur front-end : vous devez réaliser les consignes décrites dans le chapitre [Front-end](#Front-end)
+## Description
+Ce projet est une application de commerce électronique construite avec Angular pour le front-end et Node.js avec TypeScript pour le back-end. L'application permet aux utilisateurs de naviguer dans une liste de produits, de s'inscrire, de se connecter, de gérer leur panier et d'administrer les produits si l'utilisateur est un administrateur.
 
-- Vous êtes développeur back-end : vous devez réaliser les consignes décrites dans le chapitre [Back-end](#Back-end) (*)
+## Technologies Utilisées
+- **Front-end**: Angular, PrimeNG
+- **Back-end**: Node.js, Express, TypeScript, MongoDB
+- **Gestion des dépendances**: npm ou yarn
 
-- Vous êtes développeur full-stack : vous devez réaliser les consignes décrites dans le chapitre [Front-end](#Front-end) et le chapitre [Back-end](#Back-end) (*)
+## Fonctionnalités
+- Liste des produits avec détails
+- Inscription et connexion des utilisateurs
+- Ajout et suppression de produits pour les administrateurs
+- Gestion du panier
+- Notifications pour les actions utilisateurs
 
-(*) Afin de tester votre API, veuillez proposer une stratégie de test appropriée.
+## Prérequis
+Avant de commencer, assurez-vous d'avoir installé les outils suivants sur votre machine :
 
-## Front-end
+- Node.js (version 14 ou supérieure)
+- MongoDB (ou une base de données NoSQL de votre choix)
 
-Le site de e-commerce d'Alten a besoin de s'enrichir de nouvelles fonctionnalités.
+## Installation
 
-### Partie 1 : Shop
+1. **Clonez le dépôt :**
+   ```bash
+   git clone https://github.com/votre-utilisateur/nom-du-projet.git
+   cd nom-du-projet
 
-- Afficher toutes les informations pertinentes d'un produit sur la liste
-- Permettre d'ajouter un produit au panier depuis la liste 
-- Permettre de supprimer un produit du panier
-- Afficher un badge indiquant la quantité de produits dans le panier
-- Permettre de visualiser la liste des produits qui composent le panier.
+2. **Installez les dépendances :**
+   pour le back end :
+   cd back
+   npm install
 
-### Partie 2
+   pour le back end :
+   cd front
+   npm install
 
-- Créer un nouveau point de menu dans la barre latérale ("Contact")
-- Créer une page "Contact" affichant un formulaire
-- Le formulaire doit permettre de saisir son email, un message et de cliquer sur "Envoyer"
-- Email et message doivent être obligatoirement remplis, message doit être inférieur à 300 caractères.
-- Quand le message a été envoyé, afficher un message à l'utilisateur : "Demande de contact envoyée avec succès".
+   2. **Installez les dépendances :**
+   pour le back end :
+   cd back
+   npm run dev
 
-### Bonus : 
+   pour le back end :
+   cd front
+   npm start
 
-- Ajouter un système de pagination et/ou de filtrage sur la liste des produits
-- On doit pouvoir visualiser et ajuster la quantité des produits depuis la liste et depuis le panier 
-
-## Back-end
-
-### Partie 1
-
-Développer un back-end permettant la gestion de produits définis plus bas.
-Vous pouvez utiliser la technologie de votre choix parmi la liste suivante :
-
-- Node.js/Express
-- Java/Spring Boot
-- C#/.net Core
-- PHP/Symphony : Utilisation d'API Platform interdite
-
-
-Le back-end doit gérer les API suivantes : 
-
-| Resource           | POST                  | GET                            | PATCH                                    | PUT | DELETE           |
-| ------------------ | --------------------- | ------------------------------ | ---------------------------------------- | --- | ---------------- |
-| **/products**      | Create a new product  | Retrieve all products          | X                                        | X   |     X            |
-| **/products/:id**  | X                     | Retrieve details for product 1 | Update details of product 1 if it exists | X   | Remove product 1 |
-
-Un produit a les caractéristiques suivantes : 
-
-``` typescript
-class Product {
-  id: number;
-  code: string;
-  name: string;
-  description: string;
-  image: string;
-  category: string;
-  price: number;
-  quantity: number;
-  internalReference: string;
-  shellId: number;
-  inventoryStatus: "INSTOCK" | "LOWSTOCK" | "OUTOFSTOCK";
-  rating: number;
-  createdAt: number;
-  updatedAt: number;
-}
-```
-
-Le back-end créé doit pouvoir gérer les produits dans une base de données SQL/NoSQL ou dans un fichier json.
-
-### Partie 2
-
-- Imposer à l'utilisateur de se connecter pour accéder à l'API.
-  La connexion doit être gérée en utilisant un token JWT.  
-  Deux routes devront être créées :
-  * [POST] /account -> Permet de créer un nouveau compte pour un utilisateur avec les informations fournies par la requête.   
-    Payload attendu : 
-    ```
-    {
-      username: string,
-      firstname: string,
-      email: string,
-      password: string
-    }
-    ```
-  * [POST] /token -> Permet de se connecter à l'application.  
-    Payload attendu :  
-    ```
-    {
-      email: string,
-      password: string
-    }
-    ```
-    Une vérification devra être effectuée parmi tout les utilisateurs de l'application afin de connecter celui qui correspond aux infos fournies. Un token JWT sera renvoyé en retour de la reqûete.
-- Faire en sorte que seul l'utilisateur ayant le mail "admin@admin.com" puisse ajouter, modifier ou supprimer des produits. Une solution simple et générique devra être utilisée. Il n'est pas nécessaire de mettre en place une gestion des accès basée sur les rôles.
-- Ajouter la possibilité pour un utilisateur de gérer un panier d'achat pouvant contenir des produits.
-- Ajouter la possibilité pour un utilisateur de gérer une liste d'envie pouvant contenir des produits.
-
-## Bonus
-
-Vous pouvez ajouter des tests Postman ou Swagger pour valider votre API
+   ## Lien vers le Postman
+   https://crimson-capsule-81769.postman.co/workspace/New-Team-Workspace~0a80da7e-6501-4164-95b5-fadf5bb3c3c0/collection/24944181-8473373d-c223-4fef-b2f9-4edef0995f02?action=share&creator=24944181
+   
