@@ -17,24 +17,23 @@ export class CartService {
     public readonly cart = this._cart.asReadonly();
 
     public getCart(): Observable<Cart> {
-        console.log("getCart");
-        return this.http.get<Cart>(this.path).pipe(
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.authService.getToken()}` 
+        });
+
+        return this.http.get<Cart>(this.path, { headers }).pipe(
             catchError(() => of({ id: "", items: [] })), 
             tap(cart => this._cart.set(cart))
         );
     }
 
-    public addToCart(product: Product, quantity: number = 1, userId: string): Observable<boolean> {
-        if (!userId) {
-            console.error("User ID is not available");
-        }
-
+    public addToCart(product: Product, quantity: number = 1): Observable<boolean> {
         const headers = new HttpHeaders({
             'Authorization': `Bearer ${this.authService.getToken()}` 
-          });
+        });
         
         console.log("addToCart", product, quantity);
-        return this.http.post<boolean>(this.path, { productId: product._id, quantity, userId }, { headers }).pipe(
+        return this.http.post<boolean>(this.path, { productId: product._id, quantity }, { headers }).pipe(
             catchError(() => of(true)),
             tap(() => {
                 this._cart.update(cart => {
@@ -60,7 +59,11 @@ export class CartService {
     }
 
     public updateQuantity(productId: number, quantity: number): Observable<boolean> {
-        return this.http.patch<boolean>(`${this.path}/${productId}`, { quantity }).pipe(
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.authService.getToken()}` 
+        });
+
+        return this.http.put<boolean>(`${this.path}/${productId}`, { quantity }, { headers }).pipe(
             catchError(() => of(true)),
             tap(() => {
                 this._cart.update(cart => ({
@@ -74,7 +77,11 @@ export class CartService {
     }
 
     public removeFromCart(productId: number): Observable<boolean> {
-        return this.http.delete<boolean>(`${this.path}/${productId}`).pipe( 
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.authService.getToken()}` 
+        });
+
+        return this.http.delete<boolean>(`${this.path}/${productId}`, { headers }).pipe( 
             catchError(() => of(true)),
             tap(() => {
                 this._cart.update(cart => ({
@@ -86,7 +93,11 @@ export class CartService {
     }
 
     public clearCart(): Observable<boolean> {
-        return this.http.delete<boolean>(this.path).pipe(
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.authService.getToken()}` 
+        });
+
+        return this.http.delete<boolean>(this.path, { headers }).pipe(
             catchError(() => of(true)),
             tap(() => this._cart.set({ id: "", items: [] }))
         );

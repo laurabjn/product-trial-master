@@ -84,10 +84,9 @@ export class ProductListComponent implements OnInit {
   public confirmAddToCart() {
     const product = this.selectedProduct();
     const quantity = this.selectedQuantity();
-    const userId = this.authService.getCurrentUser()?.userId;
   
-    if (product && userId) {
-      this.cartService.addToCart(product, quantity, userId).subscribe(() => {
+    if (product) {
+      this.cartService.addToCart(product, quantity).subscribe(() => {
         this.notificationService.showSuccess(`${product.name} a été ajouté au panier.`);
         this.closeCartDialog();
       });

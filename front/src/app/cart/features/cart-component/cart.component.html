@@ -19,7 +19,7 @@
         </td>
         <td>{{ item.product.price * item.quantity }} €</td>
         <td>
-          <button pButton type="button" icon="pi pi-trash" class="p-button-danger" (click)="removeItem(item.product.id)"></button>
+          <button pButton type="button" icon="pi pi-trash" class="p-button-danger" (click)="removeItem(item)"></button>
         </td>
       </tr>
     </ng-template>

@@ -21,23 +21,21 @@ export class CartComponent implements OnInit {
     this.cartService.getCart().subscribe();
   }
 
-  /** Modifier la quantité d'un produit */
   public updateQuantity(item: CartItem, quantity: number) {
-    if (quantity < 1) return; // Empêcher une quantité négative
+    if (quantity < 1) return; // Prevent negative quantities
     this.cartService.updateQuantity(item.product._id, quantity).subscribe();
   }
 
-  /** Supprimer un produit du panier */
-  public removeItem(productId: number) {
-    this.cartService.removeFromCart(productId).subscribe();
+  public removeItem(item: CartItem) {
+    console.log("removeItem", item);
+    console.log("Product ID:", item.product._id);
+    this.cartService.removeFromCart(item.product._id).subscribe();
   }
 
-  /** Vider tout le panier */
   public clearCart() {
     this.cartService.clearCart().subscribe();
   }
 
-  /** Calculer le total du panier */
   public getTotal(): number {
     return this.cart()?.items.reduce((total, item) => total + item.product.price * item.quantity, 0) || 0;
   }
