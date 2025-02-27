@@ -30,19 +30,23 @@ Avant de commencer, assurez-vous d'avoir installé les outils suivants sur votre
 
 2. **Installez les dépendances :**
    pour le back end :
+   ```bash
    cd back
    npm install
 
    pour le back end :
+   ```bash
    cd front
    npm install
 
    2. **Installez les dépendances :**
    pour le back end :
+   ```bash
    cd back
    npm run dev
 
    pour le back end :
+   ```bash
    cd front
    npm start
 
