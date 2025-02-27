@@ -89,32 +89,31 @@ router.post("/register", async (req, res) => {
  *       500:
  *         description: Error connecting
  */
-router.post("/login", async (req, res) => {
+router.post("/login", async (req: express.Request, res: express.Response): Promise<void> => { // Correction du typage
     const { email, password } = req.body;
 
     try {
-        // Check if the user exists
         const user = await User.findOne({ email });
         if (!user) {
             res.status(400).json({ message: "Invalid user" });
+            return;
         }
 
-        // Check if the password is correct
-        const isPasswordCorrect = await bcrypt.compare(password, user!.password);
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
         if (!isPasswordCorrect) {
             res.status(400).json({ message: "Invalid password" });
+            return;
         }
 
-        // Create a token
         const token = jwt.sign(
-            { userId: user!._id, isAdmin: user!.isAdmin }, 
+            { userId: user._id, isAdmin: user.isAdmin }, 
             process.env.JWT_SECRET as string, 
             { expiresIn: "1h" }
         );
-        console.log("User logged in:", user);
+
         res.json({ token });
     } catch (error) {
-      res.status(500).json({ error: "Error connecting" });
+        res.status(500).json({ error: "Error connecting" });
     }
 });
 

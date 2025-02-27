@@ -24,7 +24,7 @@ router.get("/", authMiddleware, async (req: any, res) => {
   console.log("get cart");
   try {
     const cart = await Cart.findOne({ userId: req.user.userId }).populate("items.product");
-    console.log(cart);
+    console.log("cart", cart);
     res.json(cart || { userId: req.user.userId, items: [] });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
@@ -152,6 +152,40 @@ router.put("/:productId", authMiddleware, async (req: AuthRequest, res: Response
     res.json({ message: "Product quantity updated successfully", cart });
   } catch (error) {
     console.error("Error updating product quantity in cart:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * @swagger
+ * /cart/clear:
+ *   delete:
+ *     summary: Clear the user's cart
+ *     tags: [Cart]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cart cleared successfully
+ *       404:
+ *         description: Cart not found
+ *       500:
+ *         description: Internal server error
+ */
+router.delete("/clear", authMiddleware, async (req: any, res) => {
+  try {
+    const cart = await Cart.findOne({ userId: req.user.userId });
+
+    if (!cart) {
+      res.status(404).json({ error: "Cart not found" });
+    }
+
+    cart!.items = [];
+    await cart!.save();
+
+    res.json({ message: "Cart cleared successfully" });
+  } catch (error) {
+    console.error("Error clearing cart:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
