@@ -39,7 +39,7 @@ Avant de commencer, assurez-vous d'avoir installé les outils suivants sur votre
    cd front
    npm install
 
-   2. **Installez les dépendances :**
+3. **Démarrer le serveur back-end :**
    pour le back end :
    ```bash
    cd back
