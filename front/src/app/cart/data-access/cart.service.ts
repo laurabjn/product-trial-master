@@ -97,7 +97,7 @@ export class CartService {
             'Authorization': `Bearer ${this.authService.getToken()}` 
         });
 
-        return this.http.delete<boolean>(this.path, { headers }).pipe(
+        return this.http.delete<boolean>(`${this.path}/clear`, { headers }).pipe(
             catchError(() => of(true)),
             tap(() => this._cart.set({ id: "", items: [] }))
         );
