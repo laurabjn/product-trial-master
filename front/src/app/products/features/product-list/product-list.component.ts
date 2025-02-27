@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from "@angular/core";
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
+import { PaginatorModule } from 'primeng/paginator';
 import { Product } from "app/products/data-access/product.model";
 import { ProductFormComponent } from "app/products/ui/product-form/product-form.component";
 import { ProductQuantityComponent } from "app/products/ui/product-quantity/product-quantity.component";
@@ -35,7 +36,17 @@ const emptyProduct: Product = {
   templateUrl: "./product-list.component.html",
   styleUrls: ["./product-list.component.scss"],
   standalone: true,
-  imports: [DataViewModule, CardModule, ButtonModule, DialogModule, ProductFormComponent, ProductQuantityComponent, CommonModule, ToastModule],
+  imports: [
+    DataViewModule,
+    CardModule,
+    ButtonModule,
+    DialogModule,
+    ProductFormComponent,
+    ProductQuantityComponent,
+    CommonModule,
+    ToastModule,
+    PaginatorModule,
+  ],
 })
 export class ProductListComponent implements OnInit {
   private readonly productsService = inject(ProductsService);
@@ -43,7 +54,8 @@ export class ProductListComponent implements OnInit {
   public readonly cartService = inject(CartService);
   private readonly notificationService = inject(NotificationService)
 
-  public readonly products = this.productsService.products;
+  // public readonly products = this.productsService.products;
+  public readonly products = signal<Product[]>([]);
 
   public isCartDialogVisible = false;
   public isAdmin = false;
@@ -53,10 +65,24 @@ export class ProductListComponent implements OnInit {
   public selectedQuantity = signal<number>(1);
   public readonly editedProduct = signal<Product>(emptyProduct);
 
+  public pageSize = 5;
+  public totalProducts = 0;
+  public currentPage = 0;
+
   ngOnInit() {
-    this.productsService.get().subscribe();
+    this.productsService.get().subscribe(products => {
+      this.totalProducts = products.length; 
+      this.products.set(products.slice(0, this.pageSize)); 
+    });
     const user = this.authService.getCurrentUser();
     this.isAdmin = user?.isAdmin ?? false;
+  }
+
+  public onPageChange(event: any) {
+    this.currentPage = event.page;
+    const start = this.currentPage * this.pageSize;
+    const end = start + this.pageSize;
+    this.products.set(this.productsService.products().slice(start, end)); 
   }
 
   public onCreate() {
