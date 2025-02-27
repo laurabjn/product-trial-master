@@ -1,0 +1,33 @@
+.container {
+    max-width: 500px;
+    margin: auto;
+    padding: 20px;
+  }
+  
+  input, textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  button {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  button:disabled {
+    background-color: gray;
+  }
+  
+  .success-message {
+    margin-top: 10px;
+    color: green;
+    font-weight: bold;
+  }
+  

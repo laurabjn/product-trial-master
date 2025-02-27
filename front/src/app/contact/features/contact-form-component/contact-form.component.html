@@ -1,0 +1,28 @@
+<div class="container">
+    <h2>Contactez-nous</h2>
+  
+    <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+      <div>
+        <label>Email :</label>
+        <input type="email" formControlName="email" required />
+        <div *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched">
+          Un email valide est requis.
+        </div>
+      </div>
+  
+      <div>
+        <label>Message :</label>
+        <textarea formControlName="message" rows="5" required></textarea>
+        <div *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched">
+          Le message est requis et doit être inférieur à 300 caractères.
+        </div>
+      </div>
+  
+      <button type="submit" [disabled]="contactForm.invalid">Envoyer</button>
+    </form>
+  
+    <div *ngIf="successMessage" class="success-message">
+      {{ successMessage }}
+    </div>
+  </div>
+  

@@ -3,6 +3,7 @@ import { AuthGuard } from "./auth/data-access/auth.guard";
 import { HomeComponent } from "./shared/features/home/home.component";
 import { CartComponent } from "./cart/features/cart-component/cart.component";
 import { LoginComponent } from "./auth/features/auth-form/login-form.component";
+import { ContactFormComponent } from "./contact/features/contact-form-component/contact-form.component";
 
 export const APP_ROUTES: Routes = [
   {
@@ -22,6 +23,10 @@ export const APP_ROUTES: Routes = [
   {
     path: "cart",
     component: CartComponent,
+  },
+  {
+    path: "contact",
+    component: ContactFormComponent
   },
   { path: "", redirectTo: "home", pathMatch: "full" },
 ];
