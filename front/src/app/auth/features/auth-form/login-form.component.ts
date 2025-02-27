@@ -29,6 +29,11 @@ import { PasswordModule } from 'primeng/password';
                 <div *ngIf="errorMessage" class="p-mt-2 text-red-500">
                   {{ errorMessage }}
                 </div>
+
+                <p class="text-center mt-3">
+                  Pas encore de compte ?
+                  <a (click)="navigateToRegister()" class="text-blue-500 cursor-pointer">Inscrivez-vous ici</a>
+                </p>
             </form>
         </div>
     </div>
@@ -42,7 +47,11 @@ export class LoginComponent {
   password = '';
   errorMessage: string | null = null;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router) { }
+  
+  navigateToRegister() {
+    this.router.navigate(['/register']);
+  }
 
   onSubmit() {
     this.errorMessage = null;

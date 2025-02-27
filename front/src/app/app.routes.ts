@@ -4,6 +4,7 @@ import { HomeComponent } from "./shared/features/home/home.component";
 import { CartComponent } from "./cart/features/cart-component/cart.component";
 import { LoginComponent } from "./auth/features/auth-form/login-form.component";
 import { ContactFormComponent } from "./contact/features/contact-form-component/contact-form.component";
+import { RegisterFormComponent } from "./auth/features/auth-form/register-form.component";
 
 export const APP_ROUTES: Routes = [
   {
@@ -13,6 +14,10 @@ export const APP_ROUTES: Routes = [
   {
     path: "login",
     component: LoginComponent,
+  },
+  {
+    path: "register",
+    component: RegisterFormComponent,
   },
   {
     path: "products",

@@ -4,6 +4,7 @@ import { Observable, of, BehaviorSubject } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { AuthResponse } from './auth.model';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,21 @@ export class AuthService {
     private authStatus = new BehaviorSubject<boolean>(this.isAuthenticated());
     private readonly apiUrl = 'http://localhost:5000/api/auth';
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient, private router: Router) { }
+    
+    register(userData: { username: string; firstname: string; email: string; password: string }): Observable<AuthResponse | null> { 
+        return this.http.post<AuthResponse>(`${this.apiUrl}/register`, userData).pipe(
+        tap((response: AuthResponse) => {
+            if (response) {
+                console.log('Account created successfully', response);
+            }
+        }),
+        catchError((error) => {
+            console.error('Error during registration', error);
+            return of(null);
+        })
+        );
+    }
 
     login(email: string, password: string): Observable<AuthResponse | null> {
         return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { email, password }).pipe(
@@ -54,6 +69,7 @@ export class AuthService {
 
     logout() {
         localStorage.removeItem('token'); 
+        this.router.navigate(['/login']);
     }
 
     isAuthenticated(): boolean {
